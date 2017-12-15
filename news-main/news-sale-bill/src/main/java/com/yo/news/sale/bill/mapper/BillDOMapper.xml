@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yo.news.sale.bill.mapper.BillDOMapper">
+  <resultMap id="BaseResultMap" type="com.yo.news.sale.bill.domain.BillDO">
+    <id column="billId" jdbcType="VARCHAR" property="billId" />
+    <result column="orderId" jdbcType="VARCHAR" property="orderId" />
+    <result column="buyerInstId" jdbcType="VARCHAR" property="buyerInstId" />
+    <result column="buyerId" jdbcType="VARCHAR" property="buyerId" />
+    <result column="sellerInstId" jdbcType="VARCHAR" property="sellerInstId" />
+    <result column="payType" jdbcType="TINYINT" property="payType" />
+    <result column="pay3rdId" jdbcType="VARCHAR" property="pay3rdId" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="createdTime" jdbcType="INTEGER" property="createdTime" />
+    <result column="payTime" jdbcType="INTEGER" property="payTime" />
+    <result column="checkStatus" jdbcType="TINYINT" property="checkStatus" />
+    <result column="previousPayType" jdbcType="TINYINT" property="previousPayType" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    billId, orderId, buyerInstId, buyerId, sellerInstId, payType, pay3rdId, price, createdTime, 
+    payTime, checkStatus, previousPayType, remark
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from bill
+    where billId = #{billId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from bill
+    where billId = #{billId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.yo.news.sale.bill.domain.BillDO">
+    insert into bill (billId, orderId, buyerInstId, 
+      buyerId, sellerInstId, payType, 
+      pay3rdId, price, createdTime, 
+      payTime, checkStatus, previousPayType, 
+      remark)
+    values (#{billId,jdbcType=VARCHAR}, #{orderId,jdbcType=VARCHAR}, #{buyerInstId,jdbcType=VARCHAR}, 
+      #{buyerId,jdbcType=VARCHAR}, #{sellerInstId,jdbcType=VARCHAR}, #{payType,jdbcType=TINYINT}, 
+      #{pay3rdId,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{createdTime,jdbcType=INTEGER}, 
+      #{payTime,jdbcType=INTEGER}, #{checkStatus,jdbcType=TINYINT}, #{previousPayType,jdbcType=TINYINT}, 
+      #{remark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yo.news.sale.bill.domain.BillDO">
+    insert into bill
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="billId != null">
+        billId,
+      </if>
+      <if test="orderId != null">
+        orderId,
+      </if>
+      <if test="buyerInstId != null">
+        buyerInstId,
+      </if>
+      <if test="buyerId != null">
+        buyerId,
+      </if>
+      <if test="sellerInstId != null">
+        sellerInstId,
+      </if>
+      <if test="payType != null">
+        payType,
+      </if>
+      <if test="pay3rdId != null">
+        pay3rdId,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+      <if test="createdTime != null">
+        createdTime,
+      </if>
+      <if test="payTime != null">
+        payTime,
+      </if>
+      <if test="checkStatus != null">
+        checkStatus,
+      </if>
+      <if test="previousPayType != null">
+        previousPayType,
+      </if>
+      <if test="remark != null">
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="billId != null">
+        #{billId,jdbcType=VARCHAR},
+      </if>
+      <if test="orderId != null">
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerInstId != null">
+        #{buyerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerId != null">
+        #{buyerId,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerInstId != null">
+        #{sellerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null">
+        #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="pay3rdId != null">
+        #{pay3rdId,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="createdTime != null">
+        #{createdTime,jdbcType=INTEGER},
+      </if>
+      <if test="payTime != null">
+        #{payTime,jdbcType=INTEGER},
+      </if>
+      <if test="checkStatus != null">
+        #{checkStatus,jdbcType=TINYINT},
+      </if>
+      <if test="previousPayType != null">
+        #{previousPayType,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yo.news.sale.bill.domain.BillDO">
+    update bill
+    <set>
+      <if test="orderId != null">
+        orderId = #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerInstId != null">
+        buyerInstId = #{buyerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerId != null">
+        buyerId = #{buyerId,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerInstId != null">
+        sellerInstId = #{sellerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null">
+        payType = #{payType,jdbcType=TINYINT},
+      </if>
+      <if test="pay3rdId != null">
+        pay3rdId = #{pay3rdId,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="createdTime != null">
+        createdTime = #{createdTime,jdbcType=INTEGER},
+      </if>
+      <if test="payTime != null">
+        payTime = #{payTime,jdbcType=INTEGER},
+      </if>
+      <if test="checkStatus != null">
+        checkStatus = #{checkStatus,jdbcType=TINYINT},
+      </if>
+      <if test="previousPayType != null">
+        previousPayType = #{previousPayType,jdbcType=TINYINT},
+      </if>
+      <if test="remark != null">
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where billId = #{billId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yo.news.sale.bill.domain.BillDO">
+    update bill
+    set orderId = #{orderId,jdbcType=VARCHAR},
+      buyerInstId = #{buyerInstId,jdbcType=VARCHAR},
+      buyerId = #{buyerId,jdbcType=VARCHAR},
+      sellerInstId = #{sellerInstId,jdbcType=VARCHAR},
+      payType = #{payType,jdbcType=TINYINT},
+      pay3rdId = #{pay3rdId,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DECIMAL},
+      createdTime = #{createdTime,jdbcType=INTEGER},
+      payTime = #{payTime,jdbcType=INTEGER},
+      checkStatus = #{checkStatus,jdbcType=TINYINT},
+      previousPayType = #{previousPayType,jdbcType=TINYINT},
+      remark = #{remark,jdbcType=VARCHAR}
+    where billId = #{billId,jdbcType=VARCHAR}
+  </update>
+</mapper>

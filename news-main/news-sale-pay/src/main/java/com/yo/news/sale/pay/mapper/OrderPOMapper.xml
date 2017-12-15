@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.yo.news.sale.pay.mapper.OrderPOMapper">
+  <resultMap id="BaseResultMap" type="com.yo.news.sale.pay.domain.OrderPO">
+    <id column="orderId" jdbcType="VARCHAR" property="orderId" />
+    <result column="buyerInstId" jdbcType="VARCHAR" property="buyerInstId" />
+    <result column="buyerId" jdbcType="VARCHAR" property="buyerId" />
+    <result column="sellerInstId" jdbcType="VARCHAR" property="sellerInstId" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="createdTime" jdbcType="INTEGER" property="createdTime" />
+    <result column="payTime" jdbcType="INTEGER" property="payTime" />
+  </resultMap>
+  
+  <sql id="Base_Column_List">
+    orderId, buyerInstId, buyerId, sellerInstId, price, status, createdTime, payTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from orders
+    where orderId = #{orderId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from orders
+    where orderId = #{orderId,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.yo.news.sale.pay.domain.OrderPO">
+    insert into orders (orderId, buyerInstId, buyerId, 
+      sellerInstId, price, status, 
+      createdTime, payTime)
+    values (#{orderId,jdbcType=VARCHAR}, #{buyerInstId,jdbcType=VARCHAR}, #{buyerId,jdbcType=VARCHAR}, 
+      #{sellerInstId,jdbcType=VARCHAR}, #{price,jdbcType=DECIMAL}, #{status,jdbcType=TINYINT}, 
+      #{createdTime,jdbcType=INTEGER}, #{payTime,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.yo.news.sale.pay.domain.OrderPO">
+    insert into orders
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="orderId != null">
+        orderId,
+      </if>
+      <if test="buyerInstId != null">
+        buyerInstId,
+      </if>
+      <if test="buyerId != null">
+        buyerId,
+      </if>
+      <if test="sellerInstId != null">
+        sellerInstId,
+      </if>
+      <if test="price != null">
+        price,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="createdTime != null">
+        createdTime,
+      </if>
+      <if test="payTime != null">
+        payTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="orderId != null">
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerInstId != null">
+        #{buyerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerId != null">
+        #{buyerId,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerInstId != null">
+        #{sellerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createdTime != null">
+        #{createdTime,jdbcType=INTEGER},
+      </if>
+      <if test="payTime != null">
+        #{payTime,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.yo.news.sale.pay.domain.OrderPO">
+    update orders
+    <set>
+      <if test="buyerInstId != null">
+        buyerInstId = #{buyerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="buyerId != null">
+        buyerId = #{buyerId,jdbcType=VARCHAR},
+      </if>
+      <if test="sellerInstId != null">
+        sellerInstId = #{sellerInstId,jdbcType=VARCHAR},
+      </if>
+      <if test="price != null">
+        price = #{price,jdbcType=DECIMAL},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createdTime != null">
+        createdTime = #{createdTime,jdbcType=INTEGER},
+      </if>
+      <if test="payTime != null">
+        payTime = #{payTime,jdbcType=INTEGER},
+      </if>
+    </set>
+    where orderId = #{orderId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.yo.news.sale.pay.domain.OrderPO">
+    update orders
+    set buyerInstId = #{buyerInstId,jdbcType=VARCHAR},
+      buyerId = #{buyerId,jdbcType=VARCHAR},
+      sellerInstId = #{sellerInstId,jdbcType=VARCHAR},
+      price = #{price,jdbcType=DECIMAL},
+      status = #{status,jdbcType=TINYINT},
+      createdTime = #{createdTime,jdbcType=INTEGER},
+      payTime = #{payTime,jdbcType=INTEGER}
+    where orderId = #{orderId,jdbcType=VARCHAR}
+  </update>
+</mapper>

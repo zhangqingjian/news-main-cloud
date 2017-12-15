@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context-3.0.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         http://www.springframework.org/schema/aop 
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+	<bean id="parentDataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		destroy-method="close" scope="singleton">
+		<!-- 初始化时建立物理连接的个数。初始化发生在显示调用init方法，或者第一次getConnection时 -->
+		<property name="initialSize" value="2" />
+		<!-- 最小连接池数量 -->
+		<property name="minIdle" value="2" />
+		<!-- 最大连接池数量 -->
+		<property name="maxActive" value="20" />
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="60000" />
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="60000" />
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="300000" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。 -->
+		<property name="validationQuery" value="SELECT 'x'" />
+		<!-- 建议配置为true，不影响性能，并且保证安全性。申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。 -->
+		<property name="testWhileIdle" value="true" />
+		<!-- 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能。 -->
+		<property name="testOnBorrow" value="false" />
+		<!-- 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能 -->
+		<property name="testOnReturn" value="false" />
+		<!-- 是否缓存preparedStatement，也就是PSCache。PSCache对支持游标的数据库性能提升巨大，比如说oracle。 -->
+		<property name="poolPreparedStatements" value="true" />
+		<!-- 要启用PSCache，必须配置大于0，当大于0时，poolPreparedStatements自动触发修改为true。 在Druid中，不会存在Oracle下PSCache占用内存过多的问题，可以把这个数值配置大一些，比如说100 -->
+		<property name="maxPoolPreparedStatementPerConnectionSize"
+			value="20" />
+		<!-- 配置监控统计拦截的filters -->
+		<property name="filters" value="stat" />
+	</bean>
+	<!-- 主数据源 -->
+	<bean id="masterDataSource" parent="parentDataSource" scope="singleton"
+		init-method="init">
+		<!-- Druid会自动根据url地址判断是用什么驱动 -->
+		<property name="driverClassName" value="${master.jdbc.driverClassName}" />
+		<property name="url" value="${master.jdbc.url}" />
+		<property name="username" value="${master.jdbc.username}" />
+		<property name="password" value="${master.jdbc.password}" />
+	</bean>
+	<!-- 从数据源 -->
+	<bean id="slaveDataSource" parent="parentDataSource" scope="singleton"
+		init-method="init">
+		<!-- Druid会自动根据url地址判断是用什么驱动 -->
+		<property name="driverClassName" value="${slave.jdbc.driverClassName}" />
+		<property name="url" value="${slave.jdbc.url}" />
+		<property name="username" value="${slave.jdbc.username}" />
+		<property name="password" value="${slave.jdbc.password}" />
+	</bean>
+
+	<bean id="dataSource"
+		class="com.yo.news.sale.framework.utils.database.DynamicDataSource"
+		scope="singleton">
+		<property name="targetDataSources">
+			<map key-type="java.lang.String">
+				<entry key="master" value-ref="masterDataSource" />
+				<entry key="slave" value-ref="slaveDataSource" />
+			</map>
+		</property>
+		<property name="defaultTargetDataSource" ref="masterDataSource" />
+	</bean>
+	<!-- 切换数据源 -->
+	<bean id="dataSourceAdvice"
+		class="com.yo.news.sale.framework.utils.database.DataSourceAdvice"
+		scope="singleton">
+		<property name="slaveFilterList">
+			<list>
+				<!-- 如果请求中包含以下路径，则进入slave拦截 -->
+				<value>get</value>
+				<value>login</value>
+				<value>check</value>
+				<value>search</value>
+				<value>select</value>
+				<value>push</value>
+				<value>find</value>
+				<value>query</value>
+				<value>count</value>
+				<value>stastic</value>
+			</list>
+		</property>
+	</bean>
+
+	<aop:config>
+		<aop:advisor pointcut="execution(public * com.yo.news..*.ebo.*.*(..))"
+			advice-ref="dataSourceAdvice" />
+	</aop:config>
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
+		scope="singleton">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<!-- propagation="REQUIRED" 支持事务 -->
+			<tx:method name="save*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="add*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="insert*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="update*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="edit*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="delete*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="del*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="remove*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="create*" propagation="REQUIRED" read-only="false" />
+			<tx:method name="cancel*" propagation="REQUIRED" read-only="false" />
+			<!-- 只有对于那些具有可能启动一个新事务的传播行为(PROPAGATION_REQUIRED,PROPAGATION_REQUIREDS_NEW,PROPAGATION_NESTED)的方法来说 
+				，将事务声明为只读才有意义。例如create方法定义为REQUIRED，在create方法中调用get，那么get方法的readonly就会有效 -->
+			<!-- 如果没有给get设定propagation="REQUIRED",其默认就是REQUIRED -->
+			<!-- 不管此处对不对get进行设置，该方法中如果涉及到多次调用dao层，其只会开启一次数据库 -->
+			<!-- 此处设置get 为read-only="true" 其作用在于：当像ebo层的save方法调用其他ebo层的get方法时，因为get方法是readonly,spring会对get方法做类似于不启动回滚段，不记录回滚log等优化手段。设置成 
+				propagation="SUPPORTS"，如果调用该get方法的其他方法已经开启了事务，那么该get方法也会被放到事务当中去 -->
+			<tx:method name="get*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="search*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="select*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="check*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="count*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="login*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="report*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+			<tx:method name="*" propagation="SUPPORTS" read-only="true" />
+		</tx:attributes>
+	</tx:advice>
+	<!-- 针对public的方法进行切面 -->
+	<!-- <aop:config> -->
+	<!-- <aop:pointcut id="pointCut" -->
+	<!-- expression=" execution(public * com.yo.news..*.ebo.*.*(..))" /> -->
+	<!-- <aop:advisor advice-ref="txAdvice" pointcut-ref="pointCut" /> -->
+	<!-- </aop:config> -->
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean"
+		scope="singleton">
+		<!--dataSource属性指定要用到的连接池 -->
+		<property name="dataSource" ref="dataSource" />
+		<!--configLocation属性指定mybatis的核心配置文件 -->
+		<property name="configLocation" value="classpath:mybatis-alias-config.xml" />
+		<!-- 所有配置的mapper文件 -->
+		<property name="mapperLocations" value="classpath:com/yo/news/**/mapper/*.xml" />
+	</bean>
+
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.yo.news.**.mapper" />
+	<!-- <property name="annotationClass" -->
+	<!-- value="com.yo.news.sale.framework.annotation.MyBatisRepository"></property> -->
+		<!-- 这里如果用下面这种方式会出现Cannot load JDBC driver class ${jdbc.driverClassName},-所以用sqlSessionFactoryBeanName代替 -->
+		<!-- <property name="sqlSessionFactory" ref="sqlSessionFactory" /> -->
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+</beans>
